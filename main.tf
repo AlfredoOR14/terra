@@ -5,5 +5,5 @@ provider "aws" {
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "hiol123s"  # Cambia esto a un nombre único para tu bucket
 
-  acl    = "public"  # Control de acceso (puedes cambiarlo según tus necesidades)
+  acl    = "private"  # Control de acceso (puedes cambiarlo según tus necesidades)
 }
