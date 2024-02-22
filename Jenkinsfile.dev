@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'  // Cambia esto a la región que prefieras
+        TERRAFORM_EXECUTABLE = 'C:\\Users\\anonimo\\Downloads\\terraform_1.7.3_windows_386\\terraform.exe'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                script {
+                    bat "${env.TERRAFORM_EXECUTABLE} init"
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    bat "${env.TERRAFORM_EXECUTABLE} plan"
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    input '¿Quieres aplicar los cambios?'
+                    bat "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'El despliegue de Terraform se completó con éxito.'
+        }
+        failure {
+            echo 'Hubo un error en el despliegue de Terraform. Revisa los logs y la configuración.'
+        }
+    }
+}
