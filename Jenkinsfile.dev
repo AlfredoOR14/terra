@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_DEFAULT_REGION = 'us-east-1'  // Cambia esto a la región que prefieras
+        AWS_DEFAULT_REGION = 'us-east-1'
         TERRAFORM_EXECUTABLE = 'C:\\Users\\anonimo\\Downloads\\terraform_1.7.3_windows_386\\terraform.exe'
     }
 
@@ -16,7 +16,10 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    bat "${env.TERRAFORM_EXECUTABLE} init"
+                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        bat "${env.TERRAFORM_EXECUTABLE} init"
+                    }
                 }
             }
         }
@@ -24,7 +27,10 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    bat "${env.TERRAFORM_EXECUTABLE} plan"
+                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        bat "${env.TERRAFORM_EXECUTABLE} plan"
+                    }
                 }
             }
         }
@@ -33,7 +39,10 @@ pipeline {
             steps {
                 script {
                     input '¿Quieres aplicar los cambios?'
-                    bat "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
+                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        bat "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
+                    }
                 }
             }
         }
