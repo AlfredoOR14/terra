@@ -47,13 +47,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo 'El despliegue de Terraform se completó con éxito.'
-        }
-        failure {
-            echo 'Hubo un error en el despliegue de Terraform. Revisa los logs y la configuración.'
-        }
-    }
 }
