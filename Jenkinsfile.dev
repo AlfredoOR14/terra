@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        TERRAFORM_EXECUTABLE = 'C:\\Users\\anonimo\\Downloads\\terraform_1.7.3_windows_386\\terraform.exe'
+        //TERRAFORM_EXECUTABLE = '/usr/local/bin/terraform'
+        CREDENTIALS_ID = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
     }
 
     stages {
@@ -16,9 +17,13 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        bat "${env.TERRAFORM_EXECUTABLE} init"
+                    try {
+                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                            sh "${env.TERRAFORM_EXECUTABLE} init"
+                        }
+                    } catch (Exception e) {
+                        echo "Error occurred during Terraform initialization: ${e}"
+                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
@@ -27,9 +32,13 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        bat "${env.TERRAFORM_EXECUTABLE} plan"
+                    try {
+                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                            sh "${env.TERRAFORM_EXECUTABLE} plan"
+                        }
+                    } catch (Exception e) {
+                        echo "Error occurred during Terraform planning: ${e}"
+                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
@@ -38,10 +47,14 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
-                    input '¿Quieres aplicar los cambios?'
-                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        bat "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
+                    try {
+                        input message: '¿Quieres aplicar los cambios?', ok: 'Aplicar'
+                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                            sh "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
+                        }
+                    } catch (Exception e) {
+                        echo "Error occurred during Terraform apply: ${e}"
+                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
@@ -50,9 +63,14 @@ pipeline {
         stage('Destroy Terraform Resources') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        bat "${env.TERRAFORM_EXECUTABLE} destroy --auto-approve"
+                    try {
+                        sleep time: 60, unit: 'SECONDS' // Espera 1 minuto antes de destruir los recursos
+                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                            sh "${env.TERRAFORM_EXECUTABLE} destroy --auto-approve"
+                        }
+                    } catch (Exception e) {
+                        echo "Error occurred during Terraform destroy: ${e}"
+                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
