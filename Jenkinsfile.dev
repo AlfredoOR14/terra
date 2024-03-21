@@ -4,7 +4,8 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
         //TERRAFORM_EXECUTABLE = '/usr/local/bin/terraform'
-        CREDENTIALS_ID = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+        CREDENTIALS_ID = 'AWS_ACCESS_KEY_ID'
+        SECRET_CREDENTIALS_ID = 'AWS_SECRET_ACCESS_KEY'
     }
 
     stages {
@@ -18,7 +19,8 @@ pipeline {
             steps {
                 script {
                     try {
-                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                        withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
+                                         string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh "${env.TERRAFORM_EXECUTABLE} init"
                         }
                     } catch (Exception e) {
@@ -33,7 +35,8 @@ pipeline {
             steps {
                 script {
                     try {
-                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                        withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
+                                         string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh "${env.TERRAFORM_EXECUTABLE} plan"
                         }
                     } catch (Exception e) {
@@ -49,7 +52,8 @@ pipeline {
                 script {
                     try {
                         input message: '¿Quieres aplicar los cambios?', ok: 'Aplicar'
-                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                        withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
+                                         string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh "${env.TERRAFORM_EXECUTABLE} apply --auto-approve"
                         }
                     } catch (Exception e) {
@@ -65,7 +69,9 @@ pipeline {
                 script {
                     try {
                         sleep time: 60, unit: 'SECONDS' // Espera 1 minuto antes de destruir los recursos
-                        withCredentials(credentialsId: CREDENTIALS_ID, variable: 'AWS_CREDENTIALS') {
+                        input message: '¿Quieres destruir los recursos de Terraform?', ok: 'Destruir'
+                        withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
+                                         string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh "${env.TERRAFORM_EXECUTABLE} destroy --auto-approve"
                         }
                     } catch (Exception e) {
