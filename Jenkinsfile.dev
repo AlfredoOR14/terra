@@ -36,7 +36,13 @@ pipeline {
                     try {
                         withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
                                          string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                            sh "${env.TERRAFORM_EXECUTABLE} plan -no-color"
+                            def terraformPlan = sh(script: "${env.TERRAFORM_EXECUTABLE} plan -no-color", returnStdout: true).trim()
+                            if (terraformPlan.contains("No changes.")) {
+                                echo "No se encontraron cambios, omitiendo la aplicación de Terraform."
+                                currentBuild.result = 'SUCCESS'
+                            } else {
+                                echo "Se encontraron cambios, continuando con la aplicación de Terraform."
+                            }
                         }
                     } catch (Exception e) {
                         echo "Mensaje de error: ${e}"
@@ -47,6 +53,9 @@ pipeline {
         }
 
         stage('Terraform Apply') {
+            when {
+                expression { currentBuild.result != 'SUCCESS' }
+            }
             steps {
                 script {
                     try {
