@@ -7,7 +7,6 @@ pipeline {
         CREDENTIALS_ID = 'AWS_ACCESS_KEY_ID_1'
         SECRET_CREDENTIALS_ID = 'AWS_SECRET_ACCESS_KEY_1'
     }
-
     stages {
         stage('Checkout') {
             steps {
@@ -21,10 +20,10 @@ pipeline {
                     try {
                         withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID_1'),
                                          string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY_1')]) {
-                            sh "${env.TERRAFORM_EXECUTABLE} init --no-color"
+                            sh "${env.TERRAFORM_EXECUTABLE} init -no-color"
                         }
                     } catch (Exception e) {
-                        echo "Error occurred during Terraform initialization: ${e}"
+                        echo "Mensaje de error: ${e}"
                         currentBuild.result = 'FAILURE'
                     }
                 }
@@ -37,10 +36,10 @@ pipeline {
                     try {
                         withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID_1'),
                                          string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY_1')]) {
-                            sh "${env.TERRAFORM_EXECUTABLE} plan --no-color"
+                            sh "${env.TERRAFORM_EXECUTABLE} plan -no-color"
                         }
                     } catch (Exception e) {
-                        echo "Error occurred during Terraform planning: ${e}"
+                        echo "Mensaje de error: ${e}"
                         currentBuild.result = 'FAILURE'
                     }
                 }
@@ -51,13 +50,12 @@ pipeline {
             steps {
                 script {
                     try {
-                        input message: '¿Quieres aplicar los cambios?', ok: 'Aplicar'
                         withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID_1'),
                                          string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY_1')]) {
-                            sh "${env.TERRAFORM_EXECUTABLE} apply --auto-approve --no-color"
+                            sh "${env.TERRAFORM_EXECUTABLE} apply --auto-approve -no-color"
                         }
                     } catch (Exception e) {
-                        echo "Error occurred during Terraform apply: ${e}"
+                        echo "Mensaje de error: ${e}"
                         currentBuild.result = 'FAILURE'
                     }
                 }
@@ -68,14 +66,13 @@ pipeline {
             steps {
                 script {
                     try {
-                        sleep time: 60, unit: 'SECONDS' // Espera 1 minuto antes de destruir los recursos
                         input message: '¿Quieres destruir los recursos de Terraform?', ok: 'Destruir'
                         withCredentials([string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID_1'),
                                          string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY_1')]) {
-                            sh "${env.TERRAFORM_EXECUTABLE} destroy --auto-approve --no-color"
+                            sh "${env.TERRAFORM_EXECUTABLE} destroy --auto-approve  -no-color"
                         }
                     } catch (Exception e) {
-                        echo "Error occurred during Terraform destroy: ${e}"
+                        echo "Mensaje de error: ${e}"
                         currentBuild.result = 'FAILURE'
                     }
                 }
