@@ -1,22 +1,26 @@
 {
-    "nombre" : "npv" ,
-    "tag-recursos" : "NUEVO PRODUCTO VOLUNTARIO" ,
-    "microservicios" : [
+    "nombre": "npv",
+    "tag-recursos": "NUEVO PRODUCTO VOLUNTARIO",
+    "microservicios": [
         {
-            "nombre" : "apertura",
-            "context-path" : "/integra/producto-voluntario/apertura"
+            "nombre": "apertura",
+            "context-path": "/integra/producto-voluntario/apertura",
+            "Proyecto": "POC"
         },
         {
-            "nombre" : "dashboard",
-            "context-path" : "/integra/producto-voluntario/dashboard"
+            "nombre": "dashboard",
+            "context-path": "/integra/producto-voluntario/dashboard",
+            "Proyecto": "POC"
         },
         {
-            "nombre" : "consulta",
-            "context-path" : "/integra/producto-voluntario/consulta"
+            "nombre": "consulta",
+            "context-path": "/integra/producto-voluntario/consulta",
+            "Proyecto": "POC"
         },
         {
-            "nombre" : "eecc",
-            "context-path" : "/integra/producto-voluntario/eecc"
+            "nombre": "eecc",
+            "context-path": "/integra/producto-voluntario/eecc",
+            "Proyecto": "POC"
         }
     ]
 }
